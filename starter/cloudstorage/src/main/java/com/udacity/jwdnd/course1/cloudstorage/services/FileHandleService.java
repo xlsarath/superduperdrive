@@ -28,8 +28,8 @@ public class FileHandleService {
 
     public int addFile(MultipartFile multipartFile, Integer userId) throws IOException {
         if(multipartFile != null) {
-            System.out.println(" file stored");
-            File file = new File(multipartFile.getName(), multipartFile.getContentType(), multipartFile.getSize(), userId, multipartFile.getBytes());
+           // System.out.println(" file stored"+multipartFile.getName());
+            File file = new File(multipartFile.getOriginalFilename(), multipartFile.getContentType(), multipartFile.getSize(), userId, multipartFile.getBytes());
 
             return filehandleMapper.insert(file);
         } else

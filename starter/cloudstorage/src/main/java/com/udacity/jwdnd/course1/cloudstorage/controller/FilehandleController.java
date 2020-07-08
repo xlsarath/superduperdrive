@@ -46,6 +46,7 @@ public class FilehandleController {
         System.out.println(" username "+username+" "+user.getUserId());
       //  User user = (User) authentication.getPrincipal();
         if(!fileUpload.isEmpty()) {
+            System.out.println(fileUpload.getName()+" "+fileUpload.getSize());
             fileHandleService.addFile(fileUpload, user.getUserId());
             model.addAttribute("successUpload", true);
             // model.addAttribute("files", fileHandleService.getFiles(user.getUserId()));
