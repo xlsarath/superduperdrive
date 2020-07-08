@@ -38,4 +38,7 @@ public class FileHandleService {
     }
 
 
+    public boolean deleteFile(Integer userId, int id) {
+        return filehandleMapper.delete(id,userId);
+    }
 }

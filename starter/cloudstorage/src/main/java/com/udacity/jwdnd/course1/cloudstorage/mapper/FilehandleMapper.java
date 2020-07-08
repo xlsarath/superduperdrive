@@ -15,14 +15,14 @@ public interface FilehandleMapper {
     @Select("SELECT * FROM FILES")
     List<File> getAllFiles();
 
-    @Select("SELECT * FROM FILES WHERE fileid = #{fileId}")
-    File get(int fileId);
+    @Select("SELECT * FROM FILES WHERE fileid = #{fileid}")
+    File get(int fileid);
 
     @Insert("INSERT INTO FILES (filename, contenttype, filesize, filedata, userid) VALUES (#{file.filename}, #{file.contenttype}, #{file.filesize}, #{file.filedata}, #{file.userid})")
     //@Options(useGeneratedKeys = true, keyProperty = "fileId")
     int insert(@Param("file") File file);
 
-    @Delete("DELETE FROM FILES WHERE fileid = #{fileId}")
-    int delete(int fileId);
+    @Delete("DELETE FROM FILES WHERE fileid = #{fileid} and userid = #{userid}")
+    boolean delete(int fileid, int userid);
 
 }

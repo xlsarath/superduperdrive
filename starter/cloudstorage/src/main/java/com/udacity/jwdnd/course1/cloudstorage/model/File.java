@@ -4,7 +4,7 @@ public class File {
 
     public File() { }
 
-    private Integer fileId;
+    private Integer fileid;
 
     public File(String filename, String contenttype, long filesize, Integer userid, byte[] filedata) {
         this.filename = filename;
@@ -14,12 +14,12 @@ public class File {
         this.filedata = filedata;
     }
 
-    public Integer getFileId() {
-        return fileId;
+    public Integer getFileid() {
+        return fileid;
     }
 
-    public void setFileId(Integer fileId) {
-        this.fileId = fileId;
+    public void setFileid(Integer fileid) {
+        this.fileid = fileid;
     }
 
     public String getFilename() {

@@ -7,16 +7,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
 @Controller
-@RequestMapping("/upload")
 public class FilehandleController {
 
     private FileHandleService fileHandleService;
@@ -34,11 +30,21 @@ public class FilehandleController {
         return "home";
     }
 
+    @GetMapping(value="/deletefile/{id}")
+    public String deleteFile(@PathVariable("id") int id, Model model){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.getUser(principal.toString());
+        if(fileHandleService.deleteFile(user.getUserId(), id))
+            model.addAttribute("successDelete", true);
+        else
+            model.addAttribute("errorDelete",true);
+        return "result";
+    }
 
-    @PostMapping()
+    @PostMapping(value="/upload")
     private String commitUpload(@ModelAttribute("SpringWeb") User user,  MultipartFile fileUpload, Model model) throws IOException {
        // User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        System.out.println("u r inside commitupload");
+      //  System.out.println("u r inside commitupload");
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = principal.toString();
         System.out.println(username+" time to tprint");

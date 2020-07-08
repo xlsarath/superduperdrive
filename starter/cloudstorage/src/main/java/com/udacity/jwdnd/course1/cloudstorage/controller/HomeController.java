@@ -47,10 +47,10 @@ public class HomeController {
             User user = userService.getUser(username);
             System.out.println(" username "+username+" "+user.getUserId());
             if(fileHandleService.getFiles(user.getUserId()) != null){
-                System.out.println("inside file handle servie");
                 List<File> ls = fileHandleService.getFiles(user.getUserId());
-                for(File f : ls)
-                    System.out.println(f.getFilename());
+                for(File file : ls){
+                    System.out.println(file.getFileid());
+                }
                 model.addAttribute("files", fileHandleService.getFiles(user.getUserId()));
 
             }
