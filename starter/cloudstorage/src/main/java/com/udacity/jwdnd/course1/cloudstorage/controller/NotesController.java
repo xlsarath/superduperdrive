@@ -26,7 +26,6 @@ public class NotesController {
 
     @PostMapping(value="/createnote")
     public String createNotes(@ModelAttribute("SpringWeb") User user, Model model, Notes note){
-        System.out.println("here");
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = principal.toString();
         user = userMapper.getUser(username);

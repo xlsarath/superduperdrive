@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
+import com.udacity.jwdnd.course1.cloudstorage.services.CredentialHandleService;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileHandleService;
 import com.udacity.jwdnd.course1.cloudstorage.services.NotesHandleService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
@@ -22,11 +23,13 @@ public class HomeController {
     private FileHandleService fileHandleService;
     private UserService userService;
     private NotesHandleService notesHandleService;
+    private CredentialHandleService credentialHandleService;
 
-    public HomeController(FileHandleService fileHandleService, UserService userService, NotesHandleService notesHandleService) {
+    public HomeController(FileHandleService fileHandleService, UserService userService, NotesHandleService notesHandleService, CredentialHandleService credentialHandleService) {
         this.fileHandleService = fileHandleService;
         this.userService = userService;
         this.notesHandleService = notesHandleService;
+        this.credentialHandleService = credentialHandleService;
     }
 
     @GetMapping()
@@ -43,7 +46,7 @@ public class HomeController {
             User user = userService.getUser(username);
             model.addAttribute("files", fileHandleService.getFiles(user.getUserId()));
             model.addAttribute("notes", notesHandleService.getNotes(user.getUserId()));
-
+            model.addAttribute("credentials", credentialHandleService.getCredentails(user.getUserId()));
         } else {
             String username = principal.toString();
             User user = userService.getUser(username);
@@ -54,9 +57,9 @@ public class HomeController {
 //                    System.out.println(file.getFileid());
 //                }
                 model.addAttribute("files", fileHandleService.getFiles(user.getUserId()));
-                System.out.println("user name "+user.getUserId());
                 model.addAttribute("notes", notesHandleService.getNotes(user.getUserId()));
-              //  System.out.println("hhehhhehehe");
+                model.addAttribute("credentials", credentialHandleService.getCredentails(user.getUserId()));
+
             }
 
             model.addAttribute("user",user);

@@ -2,11 +2,14 @@ package com.udacity.jwdnd.course1.cloudstorage.model;
 
 public class Credential {
 
-    public int getCredentialid() {
+    public Credential(){
+    }
+
+    public Integer getCredentialid() {
         return credentialid;
     }
 
-    public void setCredentialid(int credentialid) {
+    public void setCredentialid(Integer credentialid) {
         this.credentialid = credentialid;
     }
 
@@ -34,25 +37,18 @@ public class Credential {
         this.key = key;
     }
 
-    public String getPassword() {
-        return password;
-    }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getUserid() {
+    public Integer getUserid() {
         return userid;
     }
 
-    public void setUserid(int userid) {
+    public void setUserid(Integer userid) {
         this.userid = userid;
     }
 
-    private int credentialid;
+    public Integer credentialid;
 
-    public Credential(String url, String username, String key, String password, int userid) {
+    public Credential(String url, String username, String key, String password, Integer userid) {
         this.url = url;
         this.username = username;
         this.key = key;
@@ -60,10 +56,28 @@ public class Credential {
         this.userid = userid;
     }
 
-    private String url;
-    private String username;
-    private String key;
-    private String password;
-    private int userid ;
+    public String url;
+    public String username;
+    public String key;
+    public String password;
+
+    public String getEncpassword() {
+        return password;
+    }
+
+    public void setEncpassword(String encpassword) {
+        this.password = encpassword;
+    }
+
+    public String getDecpassword() {
+        return decpassword;
+    }
+
+    public void setDecpassword(String decpassword) {
+        this.decpassword = decpassword;
+    }
+
+    private String decpassword;
+    private Integer userid ;
 
 }
