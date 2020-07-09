@@ -1,15 +1,16 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.mapper.UserMapper;
+import com.udacity.jwdnd.course1.cloudstorage.model.File;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileHandleService;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @Controller
@@ -28,6 +29,23 @@ public class FilehandleController {
     @GetMapping()
     public String fileView(){
         return "home";
+    }
+
+    @GetMapping(value="/downloadfile/{id}")
+    public void downloadFile(
+            @PathVariable("id") int fileid,
+            HttpServletResponse response) {
+        try {
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User user = userService.getUser(principal.toString());
+            File file = fileHandleService.getFile(fileid,user.getUserId());
+            org.apache.commons.io.IOUtils.copy(new ByteArrayInputStream(file.getFiledata()), response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException ex) {
+            //log.info("Error writing file to output stream. Filename was '{}'", fileName, ex);
+            throw new RuntimeException("IOError writing file to output stream");
+        }
+
     }
 
     @GetMapping(value="/deletefile/{id}")
