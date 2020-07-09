@@ -33,6 +33,7 @@ public class NotesController {
         System.out.println(username+" time to tprint");
         System.out.println(user.getUserId());
         if(note.getNoteid() == null) {
+            System.out.println("create notes");
             if (notesHandleService.createNotes(note, user.getUserId()) > 0)
                 model.addAttribute("successUpload", true);
         }

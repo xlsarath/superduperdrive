@@ -23,7 +23,7 @@ public interface NotesMapper {
     @Delete("DELETE FROM notes WHERE noteid = #{noteid} and userid = #{userid}")
     boolean deleteNote(Integer noteid, Integer userid);
 
-    @Update("UPDATE notes SET notetitle = #{note.titleid}, notedescription = #{note.notedescription} WHERE noteid = #{note.noteid} AND userid = #{userid}")
+    @Update("UPDATE notes SET notetitle = #{note.notetitle}, notedescription = #{note.notedescription} WHERE noteid = #{note.noteid} AND userid = #{userid}")
     boolean updateNote(@Param("note")Notes note, Integer userid);
 
 }

@@ -65,12 +65,12 @@ public class FilehandleController {
       //  System.out.println("u r inside commitupload");
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = principal.toString();
-        System.out.println(username+" time to tprint");
+      //  System.out.println(username+" time to tprint");
         user = userService.getUser(username);
-        System.out.println(" username "+username+" "+user.getUserId());
+        //System.out.println(" username "+username+" "+user.getUserId());
       //  User user = (User) authentication.getPrincipal();
         if(!fileUpload.isEmpty()) {
-            System.out.println(fileUpload.getName()+" "+fileUpload.getSize());
+          //  System.out.println(fileUpload.getName()+" "+fileUpload.getSize());
             fileHandleService.addFile(fileUpload, user.getUserId());
             model.addAttribute("successUpload", true);
             // model.addAttribute("files", fileHandleService.getFiles(user.getUserId()));

@@ -47,15 +47,16 @@ public class HomeController {
         } else {
             String username = principal.toString();
             User user = userService.getUser(username);
-            System.out.println(" username "+username+" "+user.getUserId());
+          //  System.out.println(" username "+username+" "+user.getUserId());
             if(fileHandleService.getFiles(user.getUserId()) != null){
 //                List<File> ls = fileHandleService.getFiles(user.getUserId());
 //                for(File file : ls){
 //                    System.out.println(file.getFileid());
 //                }
                 model.addAttribute("files", fileHandleService.getFiles(user.getUserId()));
+                System.out.println("user name "+user.getUserId());
                 model.addAttribute("notes", notesHandleService.getNotes(user.getUserId()));
-                System.out.println("hhehhhehehe");
+              //  System.out.println("hhehhhehehe");
             }
 
             model.addAttribute("user",user);
