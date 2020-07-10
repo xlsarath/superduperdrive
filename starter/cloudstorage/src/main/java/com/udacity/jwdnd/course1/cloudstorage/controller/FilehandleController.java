@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 public class FilehandleController {
@@ -71,6 +72,10 @@ public class FilehandleController {
       //  User user = (User) authentication.getPrincipal();
         if(!fileUpload.isEmpty()) {
           //  System.out.println(fileUpload.getName()+" "+fileUpload.getSize());
+            if(!checkFileAvailability(fileUpload.getOriginalFilename(), user.getUserId())){
+                model.addAttribute("fileexistserror", true);
+                return "result";
+                    }
             fileHandleService.addFile(fileUpload, user.getUserId());
             model.addAttribute("successUpload", true);
             // model.addAttribute("files", fileHandleService.getFiles(user.getUserId()));
@@ -80,5 +85,15 @@ public class FilehandleController {
             model.addAttribute("error", true);
             return "result";
         }
+    }
+
+    private boolean checkFileAvailability(String originalFilename, Integer userId) {
+        List<File> ls = fileHandleService.getFiles(userId);
+        boolean filenameExists = true;
+        for(File eachFile : ls){
+            if(eachFile.getFilename().equalsIgnoreCase(originalFilename))
+                filenameExists = false;
+        }
+        return filenameExists;
     }
 }
