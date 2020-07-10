@@ -59,6 +59,7 @@ public class HomeController {
         } else {
             String username = principal.toString();
             User user = userService.getUser(username);
+            if(user==null) return "login";
           //  System.out.println(" username "+username+" "+user.getUserId());
             if(fileHandleService.getFiles(user.getUserId()) != null){
 //                List<File> ls = fileHandleService.getFiles(user.getUserId());
