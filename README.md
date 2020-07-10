@@ -138,7 +138,7 @@ All of us here at Super*Duper*Drive wish you good luck with the project!
 ![Alt text](sample-screen-outputs/credentails_password_encryption.png?raw=true "credentails_password_encryption")
 ![Alt text](sample-screen-outputs/notes_tab_layout.png?raw=true "notes_tab_layout")
 ![Alt text](sample-screen-outputs/files_layout.png?raw=true "files_layout")
-![Alt text](sample-screen-outputs/Test Results.png?raw=true "Test Results")
+![Alt text](sample-screen-outputs/Test_Results.png?raw=true "Test_Results")
 
 
 references/citations :
