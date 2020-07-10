@@ -14,6 +14,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping(value = { "/", "/home" })
 public class HomeController {
@@ -32,7 +34,14 @@ public class HomeController {
         this.credentialHandleService = credentialHandleService;
     }
 
-    @GetMapping()
+    @GetMapping(value="/logout")
+    public String logout(HttpSession httpSession, Model model){
+            httpSession.setAttribute("user", null);
+            model.addAttribute("user", null);
+            return "login";
+    }
+
+    @GetMapping(value = {"/","/home"})
     public  String  getHomePage(Authentication authentication, Model model) throws Exception {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
       //  User user = (User) authentication.getPrincipal();
