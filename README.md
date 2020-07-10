@@ -128,6 +128,19 @@ You aren't required to understand hashing or encryption and that's why your tech
 
 All of us here at Super*Duper*Drive wish you good luck with the project!
 
+# Application Preview
+
+![Alt text](sample-screen-outputs/login_page.png?raw=true "login_page")
+![Alt text](sample-screen-outputs/Signup_page.png?raw=true "Signup_page")
+![Alt text](sample-screen-outputs/Home_page.png?raw=true "Home_page")
+![Alt text](sample-screen-outputs/Add_personal_notes.png?raw=true "Add_personal_notes")
+![Alt text](sample-screen-outputs/Add_credentials_tab.png?raw=true "Add_credentials_tab")
+![Alt text](sample-screen-outputs/credentails_password_encryption.png?raw=true "credentails_password_encryption")
+![Alt text](sample-screen-outputs/notes_tab_layout.png?raw=true "notes_tab_layout")
+![Alt text](sample-screen-outputs/files_layout.png?raw=true "files_layout")
+![Alt text](sample-screen-outputs/Test Results.png?raw=true "Test Results")
+
+
 references/citations :
 - https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/dao/DataIntegrityViolationException.html
 - https://stackoverflow.com/questions/37693849/h2-in-memory-database-error-data-conversion-error-converting-when-using-uuid-a
