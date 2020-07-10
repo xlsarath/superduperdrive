@@ -127,3 +127,10 @@ You aren't required to understand hashing or encryption and that's why your tech
 [Encryption](https://en.wikipedia.org/wiki/Encryption)
 
 All of us here at Super*Duper*Drive wish you good luck with the project!
+
+references/citations :
+- https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/dao/DataIntegrityViolationException.html
+- https://stackoverflow.com/questions/37693849/h2-in-memory-database-error-data-conversion-error-converting-when-using-uuid-a
+- https://stackoverflow.com/questions/24802681/org-springframework-validation-beanpropertybindingresult-exception
+- https://stackoverflow.com/questions/5673260/downloading-a-file-from-spring-controllers
+- https://dzone.com/articles/using-spring-mvc’s
