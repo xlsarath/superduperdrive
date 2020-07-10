@@ -39,14 +39,14 @@ class CloudStorageApplicationTests {
 		}
 	}
 
-	@Test
+	//@Test
 	@Order(1)
 	public void getLoginPage() {
 		driver.get("http://localhost:" + this.port + "/login");
 		Assertions.assertEquals("Login", driver.getTitle());
 	}
 
-	@Test
+	//@Test
 	@Order(2)
 	public void testSignUp(){
 		driver.get("http://localhost:" + this.port + "/");
@@ -106,7 +106,7 @@ class CloudStorageApplicationTests {
 
 	}
 
-	@Test
+	//@Test
 	@Order(4)
 	public void generalSignInpostSignupTest(){
 		driver.get("http://localhost:" + this.port + "/");
@@ -121,7 +121,7 @@ class CloudStorageApplicationTests {
 		Assertions.assertEquals("Home", driver.getTitle());
 	}
 
-	@Test
+	//@Test
 	@Order(5)
 	public void unauthorizedHomePage() {
 		driver.get("http://localhost:" + this.port + "/home.html");
@@ -155,13 +155,15 @@ class CloudStorageApplicationTests {
 		WebElement noteSubmit = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveNoteButton")));
 		noteSubmit.click();
 		Assertions.assertEquals("Result", driver.getTitle());
-		driver.get("http://localhost:" + this.port + "/home");
+		driver.get("http://localhost:" + this.port + "/");
 		Assertions.assertEquals("Home", driver.getTitle());
 		notes = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-notes-tab")));
 		jse.executeScript("arguments[0].click()", notes);
-		System.out.println(notes.getText());
-		Assertions.assertTrue(notes.getText().contains("new-title"));
-		Assertions.assertTrue(notes.getText().contains("adding-description"));
+		WebElement table = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("userTable")));
+		System.out.println(table.getText()+" jjdjdjjdjefwef");
+		System.out.println(notes.getText().contains("new-title"));
+		Assertions.assertTrue(table.getText().contains("new-title"));
+		Assertions.assertTrue(table.getText().contains("adding-description"));
 	}
 
 }
