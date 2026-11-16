@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Your recovery key')}"></head>
+<body class="sdd-auth">
+<main class="sdd-auth-shell">
+    <aside th:replace="~{fragments/layout :: pqcPanel}"></aside>
+    <section class="sdd-auth-main">
+        <div class="sdd-auth-card sdd-auth-card-wide">
+            <div id="success-msg" class="alert alert-success d-flex align-items-center gap-2" role="status">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:switch="${context}">
+                    <span th:case="'signup'">Account created. Your key pairs are generated and locked with your password.</span>
+                    <span th:case="'recovery'">Account recovered. Your keys are now locked with your new password.</span>
+                    <span th:case="*">Your account was upgraded to post-quantum key pairs.</span>
+                </span>
+            </div>
+            <h1 class="h3 fw-semibold mb-1">Save your recovery key</h1>
+            <p class="text-secondary">This is the <strong>only</strong> way back into your data if you forget your
+                password. It is shown once and never stored in readable form.</p>
+
+            <div class="sdd-recovery-key my-4">
+                <code id="recovery-key" th:text="${recoveryKey}">XXXX-XXXX</code>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-sdd-copy="#recovery-key">
+                    <i class="bi bi-clipboard me-1"></i>Copy
+                </button>
+            </div>
+
+            <ul class="small text-secondary mb-4">
+                <li>Store it in a password manager or print it and keep it somewhere safe.</li>
+                <li>Anyone with this key and your username can reset your password.</li>
+                <li>Using it issues a new recovery key and retires this one.</li>
+            </ul>
+
+            <a id="continue-link" th:if="${context != 'upgrade'}" th:href="@{/login}" class="btn btn-primary btn-lg w-100">
+                I have saved it, continue to sign in</a>
+            <a id="continue-link" th:if="${context == 'upgrade'}" th:href="@{/files}" class="btn btn-primary btn-lg w-100">
+                I have saved it, continue to my drive</a>
+        </div>
+    </section>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

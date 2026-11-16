@@ -1,37 +1,56 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign in')}"></head>
+<body class="sdd-auth">
+<main class="sdd-auth-shell">
+    <aside th:replace="~{fragments/layout :: pqcPanel}"></aside>
+    <section class="sdd-auth-main">
+        <div class="sdd-auth-card">
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <span class="sdd-logo"><i class="bi bi-shield-lock-fill"></i></span>
+                <span class="fs-5 fw-semibold">SuperDuperDrive</span>
+            </div>
+            <h1 class="h3 fw-semibold mb-1">Sign in</h1>
+            <p class="text-secondary mb-4">Your password unlocks your private keys for this session only.</p>
 
-        <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}">
+            <div th:if="${param.error}" id="error-msg" class="alert alert-danger" role="alert">
+                Invalid username or password, or too many attempts. Try again later.
+            </div>
+            <div th:if="${param.throttled}" id="throttled-msg" class="alert alert-warning" role="alert">
+                Too many attempts from your network. Wait a few minutes and try again.
+            </div>
+            <div th:if="${param.keyerror}" id="keyerror-msg" class="alert alert-danger" role="alert">
+                Your keys could not be unlocked. The stored key bundle failed its integrity check.
+            </div>
+            <div th:if="${param.logout}" id="logout-msg" class="alert alert-success" role="status">
+                You have been signed out and your session keys were wiped.
+            </div>
+            <div th:if="${param.expired}" id="expired-msg" class="alert alert-info" role="status">
+                Your session ended. Sign in again to unlock your keys.
+            </div>
 
-        <title>Login</title>
-    </head>
-    <body class="p-3 mb-2 bg-light text-black">
-        <div class="container justify-content-center w-25 p-3" style="background-color: #eeeeee; margin-top: 5em;">
-            <h1 class="display-5">Login</h1>
-            <form th:action="@{/login}" method="POST">
-                <div id="error-msg" th:if="${param.error}" class="alert alert-danger">
-                    Invalid username or password
+            <form th:action="@{/login}" method="post" novalidate>
+                <div class="mb-3">
+                    <label for="inputUsername" class="form-label">Username</label>
+                    <input type="text" id="inputUsername" name="username" class="form-control form-control-lg"
+                           autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
                 </div>
-                <div id = "logout-msg" th:if="${param.logout}" class="alert alert-dark">
-                    You have been logged out
+                <div class="mb-4">
+                    <label for="inputPassword" class="form-label">Password</label>
+                    <input type="password" id="inputPassword" name="password" class="form-control form-control-lg"
+                           autocomplete="current-password" required>
                 </div>
-                <div class="form-group">
-                    <label for="inputUsername">Username</label>
-                    <input type="input" class="form-control" name="username" id="inputUsername" placeholder="Enter Username" maxlength="20" required>
-                </div>
-                <div class="form-group">
-                    <label for="inputPassword">Password</label>
-                    <input type="password" class="form-control" name="password" id="inputPassword" placeholder="Enter Password" maxlength="20" required>
-                </div>
-                <button type="submit" id="login-button" class="btn btn-primary">Login</button>
+                <button id="submit-button" type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="bi bi-unlock me-1"></i>Sign in
+                </button>
             </form>
-
-            <div class="form-group" style="margin-top: 0.5em;">
-                <label><a id="signup-link" th:href="@{/signup}">Click here to sign up</a></label>
+            <div class="d-flex justify-content-between mt-4 small">
+                <a id="signup-link" th:href="@{/signup}">Create an account</a>
+                <a id="recover-link" th:href="@{/recover}">Forgot password? Use your recovery key</a>
             </div>
         </div>
-    </body>
+    </section>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
 </html>

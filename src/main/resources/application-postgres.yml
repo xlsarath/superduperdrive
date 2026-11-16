@@ -1,0 +1,8 @@
+# PostgreSQL instead of the embedded H2 database:
+#   SDD_DB_URL=jdbc:postgresql://localhost:5432/superduperdrive SDD_DB_USER=sdd SDD_DB_PASSWORD=... \
+#   ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
+spring:
+  datasource:
+    url: ${SDD_DB_URL:jdbc:postgresql://localhost:5432/superduperdrive}
+    username: ${SDD_DB_USER:sdd}
+    password: ${SDD_DB_PASSWORD}

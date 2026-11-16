@@ -1,0 +1,15 @@
+# HTTPS via Bouncy Castle JSSE with TLS 1.3 and the hybrid X25519MLKEM768 key-exchange group.
+# A self-signed certificate is generated in memory at startup (see PqTlsConfiguration).
+server:
+  port: 8443
+  ssl:
+    bundle: pqtls
+    enabled-protocols: TLSv1.3
+  servlet:
+    session:
+      cookie:
+        secure: true
+
+sdd:
+  tls:
+    named-groups: X25519MLKEM768,x25519,secp256r1

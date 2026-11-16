@@ -1,0 +1,5 @@
+# Seeds one account exactly as the 2020 version stored it (PBKDF2-SHA1 hash, AES-ECB credential,
+# no key pairs) so that the login-time migration can be observed on the Security page.
+sdd:
+  demo:
+    legacy-account: true

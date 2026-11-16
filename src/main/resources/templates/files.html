@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Files')}"></head>
+<body class="sdd-app">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container sdd-main">
+    <div class="sdd-page-header">
+        <div>
+            <h1 class="h3 fw-semibold mb-1">Files</h1>
+            <p class="text-secondary mb-0">Each file is encrypted under its own key, wrapped with X25519 + ML-KEM-768,
+                and signed with ML-DSA-65. Downloads are verified before a single byte is sent.</p>
+        </div>
+    </div>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="card sdd-card mb-4">
+        <div class="card-body">
+            <!-- The CSRF token travels in the query string so it is still readable when a too-large
+                 multipart body is rejected before parameters are parsed. -->
+            <form id="upload-form" th:action="@{/files(_csrf=${_csrf.token})}" method="post"
+                  enctype="multipart/form-data" class="row g-2 align-items-center" data-sdd-max-bytes="52428800">
+                <div class="col-md">
+                    <label for="fileUpload" class="visually-hidden">File to upload</label>
+                    <input type="file" class="form-control" id="fileUpload" name="file" required>
+                </div>
+                <div class="col-md-auto">
+                    <button id="upload-button" type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-cloud-arrow-up me-1"></i>Encrypt and upload
+                    </button>
+                </div>
+                <div class="col-12 form-text">Up to 50 MB. File names must be unique (case-insensitive).</div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card sdd-card">
+        <div class="table-responsive">
+            <table class="table align-middle mb-0" id="fileTable">
+                <thead>
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col" class="d-none d-md-table-cell">Size</th>
+                    <th scope="col" class="d-none d-lg-table-cell">Uploaded</th>
+                    <th scope="col">Integrity</th>
+                    <th scope="col" class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(files)}">
+                    <td colspan="5" class="text-center text-secondary py-5">
+                        <i class="bi bi-inbox fs-3 d-block mb-2"></i>No files yet. Upload one above.
+                    </td>
+                </tr>
+                <tr th:each="file : ${files}" class="file-row">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-file-earmark-lock2 text-primary fs-5"></i>
+                            <div>
+                                <div class="fw-medium file-name" th:text="${file.name}">name.txt</div>
+                                <div class="small text-secondary" th:text="${file.contentType}">text/plain</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="d-none d-md-table-cell text-secondary" th:text="${@viewFormat.bytes(file.size)}">1 KB</td>
+                    <td class="d-none d-lg-table-cell text-secondary" th:text="${@viewFormat.instant(file.uploadedAt)}">date</td>
+                    <td>
+                        <span th:if="${file.signature.name() == 'VERIFIED'}" class="badge sdd-badge-verified verified-badge"
+                              th:title="${file.signature.description()}">
+                            <i class="bi bi-patch-check-fill me-1"></i>Verified · ML-DSA-65</span>
+                        <span th:unless="${file.signature.name() == 'VERIFIED'}" class="badge text-bg-danger"
+                              th:title="${file.signature.description()}" th:text="${file.signature.label()}">Invalid</span>
+                    </td>
+                    <td class="text-end text-nowrap">
+                        <a class="btn btn-sm btn-outline-primary download-link" th:href="@{/files/{id}/download(id=${file.id})}"
+                           th:classappend="${!file.readable} ? 'disabled'" title="Verify and download">
+                            <i class="bi bi-download"></i><span class="d-none d-xl-inline ms-1">Download</span></a>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/files/{id}/manifest(id=${file.id})}"
+                           th:classappend="${!file.readable} ? 'disabled'" title="Export the signed manifest (JSON)">
+                            <i class="bi bi-filetype-json"></i><span class="d-none d-xl-inline ms-1">Manifest</span></a>
+                        <form th:action="@{/files/{id}/delete(id=${file.id})}" method="post" class="d-inline"
+                              data-sdd-confirm="Delete this file permanently?">
+                            <button type="submit" class="btn btn-sm btn-outline-danger delete-file" title="Delete">
+                                <i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

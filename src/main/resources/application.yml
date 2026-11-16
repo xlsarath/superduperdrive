@@ -1,0 +1,88 @@
+# SuperDuperDrive - default (local) configuration.
+# Profiles: postgres (PostgreSQL instead of H2), pqtls (HTTPS with hybrid X25519MLKEM768 key exchange),
+# demo (seeds an account in the 2020 format to show crypto migration).
+
+spring:
+  application:
+    name: superduperdrive
+  datasource:
+    # H2 file database in PostgreSQL compatibility mode, so one Flyway script serves both databases.
+    url: jdbc:h2:file:./data/superduperdrive;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password: ""
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 51MB
+      file-size-threshold: 1MB
+  mvc:
+    format:
+      date-time: iso
+
+server:
+  port: 8085
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: never
+    include-message: never
+  servlet:
+    session:
+      timeout: 30m
+      persistent: false
+      cookie:
+        name: SDDSESSION
+        http-only: true
+        same-site: strict
+  tomcat:
+    # Read (and discard) oversized uploads so the browser receives the error page instead of a reset.
+    max-swallow-size: 64MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  pattern:
+    level: "%5p [user=%X{userId:-}]"
+  level:
+    io.github.xlsarath.superduperdrive: INFO
+
+sdd:
+  crypto:
+    current-suite: HYB-X25519-MLKEM768-AES256GCM-v1
+    # Argon2id for the key-encryption key that wraps each user's private keys (RFC 9106 second option).
+    key-wrap:
+      memory-kib: 65536
+      iterations: 3
+      parallelism: 1
+    # Argon2id for the login password hash (OWASP minimum: 19 MiB, t=2, p=1).
+    password-hash:
+      memory-kib: 19456
+      iterations: 2
+      parallelism: 1
+    stream-segment-bytes: 65536
+  storage:
+    blob-directory: ./data/blobs
+    orphan-grace-period: PT1H
+  login:
+    max-failures: 5
+    lockout-duration: PT15M
+    max-attempts-per-ip: 20
+    ip-window: PT5M
+    max-tracked-clients: 10000

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Security')}"></head>
+<body class="sdd-app">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container sdd-main" th:with="o=${overview}">
+    <div class="sdd-page-header">
+        <div>
+            <h1 class="h3 fw-semibold mb-1">Security</h1>
+            <p class="text-secondary mb-0">Your keys, the algorithm suites in use, and the protection status of every item.</p>
+        </div>
+        <form th:action="@{/security/migrate}" method="post">
+            <button id="migrate-all" type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-repeat me-1"></i>Migrate outdated items
+            </button>
+        </form>
+    </div>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card sdd-card sdd-stat h-100">
+                <div class="card-body">
+                    <div class="text-secondary small">Items on the current suite</div>
+                    <div class="fs-3 fw-semibold" id="stat-current"
+                         th:text="${#lists.size(o.items) - o.outdatedCount()} + ' / ' + ${#lists.size(o.items)}">3 / 3</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card sdd-card sdd-stat h-100">
+                <div class="card-body">
+                    <div class="text-secondary small">Files with verified ML-DSA-65 signatures</div>
+                    <div class="fs-3 fw-semibold" id="stat-verified" th:text="${o.verifiedFiles()}">2</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card sdd-card sdd-stat h-100">
+                <div class="card-body">
+                    <div class="text-secondary small">Key set</div>
+                    <div class="fw-semibold small font-monospace mt-2" th:text="${o.keySuite}">USERKEYS</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card sdd-card mb-4">
+        <div class="card-header bg-transparent fw-semibold"><i class="bi bi-key me-1"></i>Your keys</div>
+        <div class="card-body">
+            <dl class="row mb-0 small">
+                <dt class="col-sm-3">Encryption key</dt>
+                <dd class="col-sm-9"><span class="text-secondary">X25519 + ML-KEM-768 · SHA3-256 fingerprint</span><br>
+                    <code class="sdd-fingerprint" th:text="${o.encryptionKeyFingerprint}">fp</code></dd>
+                <dt class="col-sm-3">Signing key</dt>
+                <dd class="col-sm-9"><span class="text-secondary">ML-DSA-65 · SHA3-256 fingerprint</span><br>
+                    <code class="sdd-fingerprint" th:text="${o.signingKeyFingerprint}">fp</code></dd>
+                <dt class="col-sm-3">Private keys at rest</dt>
+                <dd class="col-sm-9"><span th:text="${o.keyWrap}">wrap</span>
+                    <code class="sdd-suite ms-1" th:text="${o.keyWrapMethod}">method</code><br>
+                    <span class="text-secondary">plus a second copy under your recovery key (issued
+                        <span th:text="${@viewFormat.instant(o.recoveryKeyIssuedAt)}">date</span>)</span></dd>
+                <dt class="col-sm-3">Unlocked</dt>
+                <dd class="col-sm-9 mb-0">In this session's server memory only; wiped when you sign out or the session expires.</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card sdd-card mb-4">
+        <div class="card-header bg-transparent fw-semibold"><i class="bi bi-boxes me-1"></i>Your items</div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0" id="securityTable">
+                <thead>
+                <tr>
+                    <th scope="col">Item</th>
+                    <th scope="col">Suite</th>
+                    <th scope="col">Signature</th>
+                    <th scope="col" class="d-none d-lg-table-cell">Sealed</th>
+                    <th scope="col" class="text-end">Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(o.items)}">
+                    <td colspan="5" class="text-center text-secondary py-4">Nothing stored yet.</td>
+                </tr>
+                <tr th:each="item : ${o.items}" class="security-row">
+                    <td>
+                        <span class="badge text-bg-light border me-1" th:text="${item.kind().code()}">file</span>
+                        <span class="fw-medium" th:text="${item.label()}">label</span>
+                    </td>
+                    <td>
+                        <code class="small suite-id" th:text="${item.suiteId()}">suite</code>
+                        <span th:if="${item.quantumSafe()}" class="badge sdd-badge-pq ms-1">PQ</span>
+                        <span th:unless="${item.currentSuite()}" class="badge text-bg-warning ms-1">outdated</span>
+                        <div th:if="${item.migratedFrom() != null}" class="small text-secondary">
+                            migrated from <code th:text="${item.migratedFrom()}">legacy</code></div>
+                    </td>
+                    <td>
+                        <span th:if="${item.signature().name() == 'VERIFIED'}" class="badge sdd-badge-verified">
+                            <i class="bi bi-patch-check-fill me-1"></i>Verified · ML-DSA-65</span>
+                        <span th:if="${item.signature().name() == 'NOT_APPLICABLE'}" class="text-secondary small"
+                              th:title="${item.signature().description()}">AEAD only</span>
+                        <span th:if="${item.signature().name() == 'INVALID' or item.signature().name() == 'UNSIGNED'}"
+                              class="badge text-bg-danger" th:text="${item.signature().label()}">Invalid</span>
+                    </td>
+                    <td class="d-none d-lg-table-cell small text-secondary" th:text="${@viewFormat.instant(item.sealedAt())}">date</td>
+                    <td class="text-end">
+                        <form th:action="@{/security/rekey}" method="post" class="d-inline">
+                            <input type="hidden" name="kind" th:value="${item.kind()}">
+                            <input type="hidden" name="id" th:value="${item.id()}">
+                            <button type="submit" class="btn btn-sm btn-outline-primary rekey-button"
+                                    th:disabled="${!item.readable()}" title="Fresh data key and fresh hybrid encapsulation">
+                                <i class="bi bi-arrow-repeat"></i><span class="d-none d-md-inline ms-1">Re-key</span></button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card sdd-card">
+        <div class="card-header bg-transparent fw-semibold"><i class="bi bi-diagram-3 me-1"></i>Registered algorithm suites</div>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0 small" id="suiteTable">
+                <thead>
+                <tr>
+                    <th scope="col">Suite</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Key establishment</th>
+                    <th scope="col" class="d-none d-lg-table-cell">KDF</th>
+                    <th scope="col" class="d-none d-md-table-cell">Encryption</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="suite : ${o.suites}">
+                    <td><code th:text="${suite.id()}">id</code>
+                        <span th:if="${suite.quantumSafe()}" class="badge sdd-badge-pq ms-1">PQ</span></td>
+                    <td>
+                        <span th:switch="${suite.status().name()}">
+                            <span th:case="'CURRENT'" class="badge text-bg-success">current</span>
+                            <span th:case="'SUPPORTED'" class="badge text-bg-secondary">supported</span>
+                            <span th:case="*" class="badge text-bg-warning">legacy, decrypt-only</span>
+                        </span>
+                    </td>
+                    <td th:text="${suite.keyExchange()}">kem</td>
+                    <td class="d-none d-lg-table-cell" th:text="${suite.kdf()}">kdf</td>
+                    <td class="d-none d-md-table-cell" th:text="${suite.aead()}">aead</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

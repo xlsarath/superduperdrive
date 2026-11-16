@@ -1,49 +1,59 @@
 <!DOCTYPE html>
-    <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Create account')}"></head>
+<body class="sdd-auth">
+<main class="sdd-auth-shell">
+    <aside th:replace="~{fragments/layout :: pqcPanel}"></aside>
+    <section class="sdd-auth-main">
+        <div class="sdd-auth-card sdd-auth-card-wide">
+            <a th:href="@{/login}" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i>Back to sign in</a>
+            <h1 class="h3 fw-semibold mt-3 mb-1">Create your account</h1>
+            <p class="text-secondary mb-4">We generate your X25519, ML-KEM-768 and ML-DSA-65 key pairs and lock
+                them with your password, so a copy of the database or the file store alone reveals none of your content.</p>
 
-        <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}">
-
-        <title>Sign Up</title>
-    </head>
-    <body class="p-3 mb-2 bg-light text-black">
-        <div class="container justify-content-center w-50 p-3" style="background-color: #eeeeee; margin-top: 5em;">
-            <div class="form-group">
-                <label><a th:href="@{/login}">Back to Login</a></label>
-            </div>
-
-            <h1 class="display-5">Sign Up</h1>
-            <form action="#" th:action="@{/signup}" method="POST">
-                <div id = "success-msg" th:if="${signupSuccess}" class="alert alert-dark">
-                    You successfully signed up! Please continue to the <a id="login-link" th:href="@{/login}">login</a> page.
-                </div>
-                <div id="error-msg" th:if="${signupError}" class="alert alert-danger">
-                    <span>Example Signup Error Message</span>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="inputFirstName">First Name</label>
-                        <input type="input" name="firstName" class="form-control" id="inputFirstName" placeholder="Enter First Name" maxlength="20" required>
+            <form th:action="@{/signup}" th:object="${form}" method="post" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="inputFirstName" class="form-label">First name</label>
+                        <input type="text" id="inputFirstName" th:field="*{firstName}" class="form-control"
+                               th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'" autocomplete="given-name">
+                        <div class="invalid-feedback" th:errors="*{firstName}">Error</div>
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="inputLastName">Last Name</label>
-                        <input type="input" name="lastName" class="form-control" id="inputLastName" placeholder="Enter Last Name" maxlength="20" required>
+                    <div class="col-md-6">
+                        <label for="inputLastName" class="form-label">Last name</label>
+                        <input type="text" id="inputLastName" th:field="*{lastName}" class="form-control"
+                               th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'" autocomplete="family-name">
+                        <div class="invalid-feedback" th:errors="*{lastName}">Error</div>
                     </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label for="inputUsername">Username</label>
-                        <input type="input" name="username" class="form-control" id="inputUsername" placeholder="Enter Username" maxlength="20" required>
+                    <div class="col-12">
+                        <label for="inputUsername" class="form-label">Username</label>
+                        <input type="text" id="inputUsername" th:field="*{username}" class="form-control"
+                               th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                               autocomplete="username" autocapitalize="none" spellcheck="false">
+                        <div class="invalid-feedback" id="username-error" th:errors="*{username}">Error</div>
                     </div>
-                    <div class="form-group col-md-6">
-                        <label for="inputPassword">Password</label>
-                        <input type="password" name="password" class="form-control" id="inputPassword" placeholder="Enter Password" maxlength="20" required>
+                    <div class="col-md-6">
+                        <label for="inputPassword" class="form-label">Password</label>
+                        <input type="password" id="inputPassword" th:field="*{password}" class="form-control"
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" autocomplete="new-password">
+                        <div class="invalid-feedback" th:errors="*{password}">Error</div>
+                        <div class="form-text">At least 12 characters. It protects your private keys.</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="inputConfirmPassword" class="form-label">Confirm password</label>
+                        <input type="password" id="inputConfirmPassword" th:field="*{confirmPassword}" class="form-control"
+                               th:classappend="${#fields.hasErrors('passwordConfirmed')} ? 'is-invalid'"
+                               autocomplete="new-password">
+                        <div class="invalid-feedback" th:errors="*{passwordConfirmed}">Error</div>
                     </div>
                 </div>
-                <button type="submit" id="buttonSignUp" class="btn btn-primary">Sign Up</button>
+                <button id="buttonSignUp" type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                    <i class="bi bi-key me-1"></i>Generate keys and create account
+                </button>
             </form>
         </div>
-    </body>
+    </section>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
 </html>
