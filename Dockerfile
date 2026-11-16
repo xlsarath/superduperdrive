@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 # ---- build ------------------------------------------------------------------------------------
-FROM eclipse-temurin:21-jdk AS build
+FROM eclipse-temurin:24-jdk AS build
 WORKDIR /workspace
 COPY .mvn/ .mvn/
 COPY mvnw pom.xml ./
@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/root/.m2 ./mvnw -B -q package -DskipTests \
     && java -Djarmode=tools -jar target/superduperdrive-*.jar extract --layers --launcher --destination extracted
 
 # ---- run --------------------------------------------------------------------------------------
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:24-jre
 RUN groupadd --system --gid 10001 sdd \
     && useradd --system --uid 10001 --gid sdd --home-dir /app --shell /usr/sbin/nologin sdd \
     && mkdir -p /app/data \
