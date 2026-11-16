@@ -1,0 +1,29 @@
+# Fast, isolated settings for automated tests. Argon2 costs are at their floor here only.
+spring:
+  datasource:
+    url: jdbc:h2:mem:sdd-${random.uuid};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+  devtools:
+    restart:
+      enabled: false
+
+sdd:
+  crypto:
+    key-wrap:
+      memory-kib: 8192
+      iterations: 1
+      parallelism: 1
+    password-hash:
+      memory-kib: 8192
+      iterations: 1
+      parallelism: 1
+  storage:
+    blob-directory: target/test-blobs/${random.uuid}
+  login:
+    # Many tests sign in from the same address; ClientRateLimiter has its own tests.
+    max-attempts-per-ip: 100000
+
+logging:
+  level:
+    io.github.xlsarath.superduperdrive: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
