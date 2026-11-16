@@ -1,149 +1,200 @@
-# Super*Duper*Drive Cloud Storage
-You have been hired by Super*Duper*Drive, which is a brand new company aiming to make a dent in the Cloud Storage market and is already facing stiff competition from rivals like Google Drive and Dropbox. That hasn't dampened their spirits at all, however. They want to include personal information management features in their application to differentiate them from the competition, and the minimum viable product includes three user-facing features:
+# SuperDuperDrive
 
-1. **Simple File Storage:** Upload/download/remove files
-2. **Note Management:** Add/update/remove text notes
-3. **Password Management:** Save, edit, and delete website credentials.  
+**A quantum-ready personal cloud drive: hybrid ML-KEM + X25519 envelope encryption, ML-DSA
+signatures, Argon2id — built with Spring Boot 3 and Bouncy Castle.**
 
-Super*Duper*Drive wants you to focus on building the web application with the skills you acquired in this course. That means you are responsible for developing the server, website, and tests, but other tasks like deployment belong to other teams at the company. 
+[![CI](https://github.com/xlsarath/superduperdrive/actions/workflows/ci.yml/badge.svg)](https://github.com/xlsarath/superduperdrive/actions/workflows/ci.yml)
+![Java 21](https://img.shields.io/badge/Java-21-007396?logo=openjdk&logoColor=white)
+![Spring Boot 3.5](https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?logo=springboot&logoColor=white)
+![Bouncy Castle 1.87](https://img.shields.io/badge/Bouncy%20Castle-1.87-4B5563)
+![ML-KEM-768 · ML-DSA-65](https://img.shields.io/badge/PQC-ML--KEM--768%20%C2%B7%20ML--DSA--65-4F46E5)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Starter Project
-A senior developer is assigned to be your tech lead and mentor, and they put together a starter project for you. It's a Maven project configured for all the dependencies the project requires, though you should feel free to add any additional dependencies you might require. [You can download or clone the starter repository here](https://github.com/udacity/nd035-c1-spring-boot-basics-project-starter/tree/master/starter/cloudstorage).
+Store files, notes and website credentials. Everything you put in is sealed under its own key,
+encapsulated to your personal hybrid post-quantum key pair, and every file is signed with
+ML-DSA-65. A stolen database or blob store reveals none of your content, today or after
+large quantum computers arrive.
 
-Your tech lead already designed a database schema for the project and has added it to the `src/main/resources` directory. That means you don't have to design the database, only develop the Java code to interact with it. 
+![Files with verified ML-DSA-65 signatures](docs/screenshots/04-files-verified.png)
 
-Your tech lead also created some HTML templates from the design team's website mockups, and they placed them in the `src/main/resources/templates` folder. These are static pages right now, and you have to configure them with Thymeleaf to add functionality and real data from the server you develop. You may also have to change them to support testing the application.
+## Highlights
 
-From the link above, you can download the starter code and open it as a Maven project in IntelliJ.
+- **Hybrid KEM envelopes.** Each item gets a fresh AES-256-GCM data key, wrapped by a key derived
+  from X25519 **and** ML-KEM-768 (FIPS 203) through an X-Wing-style HKDF-SHA-512 combiner. The
+  data stays safe while either algorithm holds.
+- **Streaming file encryption.** STREAM segmented AEAD with 64 KiB segments: constant memory,
+  and resistance to truncation and reordering.
+- **ML-DSA-65 signatures.** Each upload is signed as a canonical JSON manifest (FIPS 204, with
+  a context string). Downloads are verified before the first byte leaves the server, and the
+  signed manifest can be exported.
+- **Keys only you can unlock.** Private keys are wrapped with Argon2id(password) and with a
+  one-time recovery key, held unlocked only in session memory, and wiped on sign-out.
+- **Crypto agility.** Suite ids and versions on every row, a suite registry, automatic
+  migration on login, and per-item re-keying from the Security page. Accounts stored in the
+  2020 formats (PBKDF2-SHA1 hashes, AES/ECB credentials) are upgraded the first time they sign
+  in.
+- **Post-quantum TLS (optional).** The `pqtls` profile serves TLS 1.3 through Bouncy Castle JSSE
+  with the `X25519MLKEM768` key exchange.
 
-## Requirements and Roadmap
-Your tech lead is excited to work with you and has laid out a development roadmap with requirements and milestones. They tell you that there are three layers of the application you need to implement:
+## Screenshots
 
-1. The back-end with Spring Boot
-2. The front-end with Thymeleaf
-3. Application tests with Selenium
+| | |
+|---|---|
+| ![Sign in](docs/screenshots/01-login.png) | ![Sign up](docs/screenshots/02-signup.png) |
+| **Sign in.** Argon2id, lockout and rate limiting | **Sign up.** Key pairs are generated here |
+| ![Recovery key](docs/screenshots/03-recovery-key.png) | ![Files](docs/screenshots/04-files-verified.png) |
+| **Recovery key.** Shown exactly once | **Files.** Encrypted, signed, verified |
+| ![Notes](docs/screenshots/05-notes.png) | ![Credentials, encrypted](docs/screenshots/06-credentials-encrypted.png) |
+| **Notes.** Re-encrypted under a fresh key on every edit | **Credentials.** Only ciphertext is listed |
+| ![Credentials, revealed](docs/screenshots/07-credentials-revealed.png) | ![Security](docs/screenshots/08-security.png) |
+| **Reveal** decrypts one password on demand | **Security.** Keys, suites, per-item status |
+| ![Migrated legacy account](docs/screenshots/09-security-migrated.png) | ![Test results](docs/screenshots/10-test-results.png) |
+| **Migration.** A 2020 account after its first login | **Tests.** `./mvnw verify` |
 
-### The Back-End
-The back-end is all about security and connecting the front-end to database data and actions. 
+All screenshots use fictional data (`ada`, `grace`, `example.com`).
 
-1. Managing user access with Spring Security
- - You have to restrict unauthorized users from accessing pages other than the login and signup pages. To do this, you must create a security configuration class that extends the `WebSecurityConfigurerAdapter` class from Spring. Place this class in a package reserved for security and configuration. Often this package is called `security` or `config`.
- - Spring Boot has built-in support for handling calls to the `/login` and `/logout` endpoints. You have to use the security configuration to override the default login page with one of your own, discussed in the front-end section.
- - You also need to implement a custom `AuthenticationProvider` which authorizes user logins by matching their credentials against those stored in the database.  
+## Quickstart
 
+Requirements: JDK 21 or newer. Chrome is needed only for the end-to-end tests.
 
-2. Handling front-end calls with controllers
- - You need to write controllers for the application that bind application data and functionality to the front-end. That means using Spring MVC's application model to identify the templates served for different requests and populating the view model with data needed by the template. 
- - The controllers you write should also be responsible for determining what, if any, error messages the application displays to the user. When a controller processes front-end requests, it should delegate the individual steps and logic of those requests to other services in the application, but it should interpret the results to ensure a smooth user experience.
- - It's a good idea to keep your controllers in a single package to isolate the controller layer. Usually, we simply call this package `controller`!
- - If you find yourself repeating tasks over and over again in controller methods, or your controller methods are getting long and complicated, consider abstracting some methods out into services! For example, consider the `HashService` and `EncryptionService` classes included in the starter code package `service`. These classes encapsulate simple, repetitive tasks and are available anywhere dependency injection is supported. Think about additional tasks that can be similarly abstracted and reused, and create new services to support them!
-
-
-3. Making calls to the database with MyBatis mappers
- - Since you were provided with a database schema to work with, you can design Java classes to match the data in the database. These should be POJOs (Plain Old Java Objects) with fields that match the names and data types in the schema, and you should create one class per database table. These classes typically are placed in a `model` or `entity` package.
- - To connect these model classes with database data, implement MyBatis mapper interfaces for each of the model types. These mappers should have methods that represent specific SQL queries and statements required by the functionality of the application. They should support the basic CRUD (Create, Read, Update, Delete) operations for their respective models at the very least. You can place these classes in (you guessed it!) the `mapper` package.
-
-
-### The Front-End
-Your tech lead has done a thorough job developing HTML templates for the required application pages. They have included fields, modal forms, success and error message elements, as well as styling and functional components using Bootstrap as a framework. You must edit these templates and insert Thymeleaf attributes to supply the back-end data and functionality described by the following individual page requirements:
-
-1. Login page
- - Everyone should be allowed access to this page, and users can use this page to login to the application. 
- - Show login errors, like invalid username/password, on this page. 
-
-
-2. Sign Up page
- - Everyone should be allowed access to this page, and potential users can use this page to sign up for a new account. 
- - Validate that the username supplied does not already exist in the application, and show such signup errors on the page when they arise.
- - Remember to store the user's password securely!
-
-
-3. Home page
-The home page is the center of the application and hosts the three required pieces of functionality. The existing template presents them as three tabs that can be clicked through by the user:
-
-
- i. Files
-  - The user should be able to upload files and see any files they previously uploaded. 
-
-  - The user should be able to view/download or delete previously-uploaded files.
-  - Any errors related to file actions should be displayed. For example, a user should not be able to upload two files with the same name, but they'll never know unless you tell them!
-
-
- ii. Notes
-  - The user should be able to create notes and see a list of the notes they have previously created.
-  - The user should be able to edit or delete previously-created notes.
-
- iii. Credentials
- - The user should be able to store credentials for specific websites and see a list of the credentials they've previously stored. If you display passwords in this list, make sure they're encrypted!
- - The user should be able to view/edit or delete individual credentials. When the user views the credential, they should be able to see the unencrypted password.
-
-The home page should have a logout button that allows the user to logout of the application and keep their data private.
-
-### Testing
-Your tech lead trusts you to do a good job, but testing is important whether you're an excel number-cruncher or a full-stack coding superstar! The QA team at Super*Duper*Drive carries out extensive user testing. Still, your tech lead wants you to write some simple Selenium tests to verify user-facing functionality and prove that your code is feature-complete before the testers get their hands on it.
-
-1. Write tests for user signup, login, and unauthorized access restrictions.
- - Write a test that verifies that an unauthorized user can only access the login and signup pages.
- - Write a test that signs up a new user, logs in, verifies that the home page is accessible, logs out, and verifies that the home page is no longer accessible. 
-
-
-2. Write tests for note creation, viewing, editing, and deletion.
- - Write a test that creates a note, and verifies it is displayed.
- - Write a test that edits an existing note and verifies that the changes are displayed.
- - Write a test that deletes a note and verifies that the note is no longer displayed.
-
-
-3. Write tests for credential creation, viewing, editing, and deletion.
- - Write a test that creates a set of credentials, verifies that they are displayed, and verifies that the displayed password is encrypted.
- - Write a test that views an existing set of credentials, verifies that the viewable password is unencrypted, edits the credentials, and verifies that the changes are displayed.
- - Write a test that deletes an existing set of credentials and verifies that the credentials are no longer displayed.
-
-## Final Tips and Tricks
-### Password Security
-Make sure not to save the plain text credentials of the application's users in the database. That's a recipe for data breach disaster! Use a hashing function to store a scrambled version instead. Your tech lead gave you a class called `HashService` that can hash passwords for you. When the user signs up, you only store a hashed version of their password in the database, and on login, you hash the password attempt before comparing it with the hashed password in the database. Your tech lead knows that can be a little confusing, so they provided this code sample to help illustrate the idea:
-
-```
-byte[] salt = new byte[16];
-random.nextBytes(salt);
-String encodedSalt = Base64.getEncoder().encodeToString(salt);
-String hashedPassword = hashService.getHashedValue(plainPassword, encodedSalt);
-return hashedPassword;
+```bash
+./mvnw spring-boot:run
 ```
 
-For storing credentials in the main part of the application, we can't hash passwords because it's a one-way operation. The user needs access to the unhashed password, after all! So instead, you should encrypt the passwords. Your tech lead provided you with a class called `EncryptionService` that can encrypt and decrypt passwords. When a user adds new credentials, encrypt the password before storing it in the database. When the user views those credentials, decrypt the password before displaying it. Here's a little code snippet on how to use `EncryptionService`:
+Open <http://localhost:8085>, create an account and save the recovery key it shows. Data is
+kept in `./data` (H2 database and encrypted blobs).
 
+To see the legacy migration, start with the `demo` profile. It seeds an account exactly as the
+2020 version stored it (PBKDF2-SHA1 hash, AES/ECB credentials, no key pairs):
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+# sign in as grace / grace-hopper-1906, then open Security
 ```
-SecureRandom random = new SecureRandom();
-byte[] key = new byte[16];
-random.nextBytes(key);
-String encodedKey = Base64.getEncoder().encodeToString(key);
-String encryptedPassword = encryptionService.encryptValue(password, encodedKey);
-String decryptedPassword = encryptionService.decryptValue(encryptedPassword, encodedKey);
+
+### Docker
+
+```bash
+docker build -t superduperdrive .
+docker run --rm -p 8085:8085 -v sdd-data:/app/data superduperdrive
 ```
 
-You aren't required to understand hashing or encryption and that's why your tech lead provided these code samples for you. If you're curious and want to learn a little more, you can do a quick Google search or follow the links below:
+The image is multi-stage and layered, and runs as an unprivileged user (uid 10001).
 
-[Hash Function](https://en.wikipedia.org/wiki/Hash_function)
-[Encryption](https://en.wikipedia.org/wiki/Encryption)
+### Profiles
 
-All of us here at Super*Duper*Drive wish you good luck with the project!
+| Profile | What it does |
+|---|---|
+| *(default)* | H2 file database in `./data`, HTTP on port 8085 |
+| `postgres` | PostgreSQL from `SDD_DB_URL`, `SDD_DB_USER` and `SDD_DB_PASSWORD` |
+| `pqtls` | HTTPS on port 8443, TLS 1.3 via Bouncy Castle JSSE, `X25519MLKEM768` first, with an in-memory self-signed certificate for `localhost` |
+| `demo` | Seeds the legacy 2020-style account `grace` |
 
-# Application Preview
+```bash
+SDD_DB_URL=jdbc:postgresql://localhost:5432/superduperdrive SDD_DB_USER=sdd SDD_DB_PASSWORD=change-me \
+  ./mvnw spring-boot:run -Dspring-boot.run.profiles=postgres
 
-![Alt text](sample-screen-outputs/login_page.png?raw=true "login_page")
-![Alt text](sample-screen-outputs/Signup_page.png?raw=true "Signup_page")
-![Alt text](sample-screen-outputs/Home_page.png?raw=true "Home_page")
-![Alt text](sample-screen-outputs/Add_personal_notes.png?raw=true "Add_personal_notes")
-![Alt text](sample-screen-outputs/Add_credentials_tab.png?raw=true "Add_credentials_tab")
-![Alt text](sample-screen-outputs/credentails_password_encryption.png?raw=true "credentails_password_encryption")
-![Alt text](sample-screen-outputs/notes_tab_layout.png?raw=true "notes_tab_layout")
-![Alt text](sample-screen-outputs/files_layout.png?raw=true "files_layout")
-![Alt text](sample-screen-outputs/Test_Results.png?raw=true "Test_Results")
+./mvnw spring-boot:run -Dspring-boot.run.profiles=pqtls   # https://localhost:8443
+```
 
+## Architecture
 
-references/citations :
-- https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/dao/DataIntegrityViolationException.html
-- https://stackoverflow.com/questions/37693849/h2-in-memory-database-error-data-conversion-error-converting-when-using-uuid-a
-- https://stackoverflow.com/questions/24802681/org-springframework-validation-beanpropertybindingresult-exception
-- https://stackoverflow.com/questions/5673260/downloading-a-file-from-spring-controllers
-- https://dzone.com/articles/using-spring-mvc’s
+```mermaid
+flowchart LR
+    B[Browser] -->|"HTTPS / form + CSRF"| W["web<br/>thin controllers, forms"]
+    W --> S["service<br/>account, items, migration"]
+    S --> C["crypto<br/>pure Java + Bouncy Castle"]
+    S --> R["repository<br/>Spring Data JPA"]
+    S --> BS["storage<br/>encrypted blob store"]
+    R --> DB[("H2 / PostgreSQL<br/>Flyway")]
+    BS --> FS[("blob directory")]
+    SEC["security<br/>Spring Security 6"] -.-> W
+```
+
+| Package | Responsibility |
+|---|---|
+| `web` | Thin MVC controllers, validated form objects, exception mapping |
+| `security` | Login flow that unlocks the keyring, lockout, rate limiting, session keyring holder, legacy password encoder |
+| `service.account` | Signup, unlock, recovery, lockout state |
+| `service.item` | Notes, credentials, files, migration and re-keying, Security overview |
+| `service.storage` | Atomic, transactional, sharded blob store with an orphan sweeper |
+| `crypto` | Hybrid KEM, suites and registry, STREAM AEAD, ML-DSA manifests, Argon2id key wrapping, recovery keys. No Spring dependencies. |
+| `domain`, `repository` | JPA entities with optimistic locking and auditing; derived-query repositories only |
+| `config` | Security headers and filter chain, DRBG, suites, PQ-TLS |
+
+The application has no hand-written SQL or JPQL. Every query is a Spring Data derived query,
+and invariants such as unique usernames, unique file names per user and well-formed
+credentials are enforced by database constraints in the Flyway baseline.
+
+## Cryptography at a glance
+
+| Layer | Choice |
+|---|---|
+| Item key encapsulation | X25519 + ML-KEM-768 (FIPS 203), HKDF-SHA-512 combiner binding both ciphertexts and public keys |
+| Item encryption | AES-256-GCM with associated data `(kind, item id, owner id, suite, version)` |
+| File content | STREAM over AES-256-GCM, 64 KiB segments |
+| File authenticity | ML-DSA-65 (FIPS 204) over an RFC 8785 canonical JSON manifest with SHA3-256 |
+| Private keys at rest | Argon2id (64 MiB, t=3) + AES-256-GCM, plus a recovery-key copy |
+| Password hashing | Argon2id via `DelegatingPasswordEncoder`; legacy PBKDF2-SHA1 upgraded on login |
+| Unique file names | HMAC-SHA3-256 blind index |
+| Randomness | `DRBG` (Hash_DRBG, SHA-256, 256-bit) |
+| Transport (optional) | TLS 1.3 with `X25519MLKEM768` via BCJSSE |
+
+The full design is in **[docs/CRYPTO.md](docs/CRYPTO.md)**: threat model, key hierarchy diagrams,
+byte formats, the agility and migration model, and what is **not** protected.
+
+## Security notes
+
+- This is **server-side** encryption with per-user keys, not end-to-end encryption. The server
+  sees your password at sign-in and holds your unlocked keys in memory while you are signed in.
+  It protects against database, backup and storage theft, and against tampering, not against a
+  compromised running server.
+- File sizes, item counts, timestamps, usernames and display names are not encrypted.
+- Lose both your password and your recovery key and the data is unrecoverable, by design.
+- The default profile serves plain HTTP for local use. Use `pqtls` or a TLS-terminating proxy
+  anywhere else.
+- Not independently audited. See [SECURITY.md](SECURITY.md) to report issues.
+
+## Testing
+
+```bash
+./mvnw verify
+```
+
+`verify` runs 116 tests: 106 unit, slice and MockMvc tests (surefire) and 10 integration tests
+(failsafe). The opt-in screenshot tour is skipped by default.
+
+- **Crypto unit tests.** Hybrid KEM round trip, wrong recipient, context binding, implicit
+  rejection, small-order points; envelope tampering and transplanting; STREAM boundaries,
+  truncation, reordering, extension and bit flips; key wrapping with a wrong password, user or
+  downgraded Argon2 parameters; recovery-key checksums; ML-DSA manifests and canonical JSON;
+  the suite registry; and known-answer decryption of real 2020 AES/ECB data.
+- **Persistence and services.** `@DataJpaTest` against the Flyway schema, owner isolation, tamper
+  detection, legacy and retired-suite migration, re-keying, and recovery.
+- **Web security.** Security headers, CSRF, lockout, rate limiting, a legacy login upgrade, and
+  download headers.
+- **End to end.** `DriveE2EIT` drives the whole journey in headless Chrome with Selenium 4.
+  `PqTlsHandshakeIT` proves an `X25519MLKEM768`-only client connects and a classical-only client
+  is refused.
+
+The screenshots are produced by an opt-in tour against a running instance:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=demo
+./mvnw test-compile failsafe:integration-test -Dit.test=ScreenshotTourIT \
+  -Dsdd.screenshots.baseUrl=http://localhost:8085
+```
+
+## Project history
+
+Started as a Udacity Java Web Developer Nanodegree project (2020); rebuilt in 2026.
+
+The 2020 version (Spring Boot 2.2, MyBatis, AES/ECB) is preserved in the git history. Its
+password-hash and credential-encryption formats remain readable through decrypt-only legacy
+suites, and accounts in those formats move to the post-quantum design at their first sign-in.
+The `demo` profile seeds one so you can watch it happen. There is no importer for the old
+database schema. See the [changelog](CHANGELOG.md).
+
+## License
+
+[MIT](LICENSE) © 2020-2026 Sarath Makkena
