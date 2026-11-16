@@ -1,33 +1,29 @@
-HELP.md
+# Build output
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**
-!**/src/test/**
+*.class
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Local runtime data (H2 database files and encrypted blobs)
+data/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# Maven wrapper downloads
+.mvn/wrapper/maven-wrapper.jar
+
+# IDEs
+.idea/
 *.iml
+*.iws
 *.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
 .vscode/
+.classpath
+.project
+.settings/
+.factorypath
+.apt_generated
+.sts4-cache/
 
-### MacOs ###
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
